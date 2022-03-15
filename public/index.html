@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Digital COVID Certificate Decoder">
+    <meta name="apple-mobile-web-app-title" content="DCC Decoder">
+    <meta name="theme-color" content="#00D1B2">
+    <meta name="msapplication-navbutton-color" content="#00D1B2">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="msapplication-starturl" content="/">
+    <link rel="apple-touch-icon" href="assets/icons/icon-192x192.png">
+    <link rel="shortcut icon" href="favicon.png" type="image/x-png">
+    <link rel="icon" href="favicon.png" type="image/x-png">
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma-switch@2.0.0/dist/css/bulma-switch.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/fontawesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/solid.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/brands.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="form.css">
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="assets/fontawesome/css/all.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <script src="bundle.js" defer></script>
+
+    <title>Digital COVID Certificate decoder</title>
+
+</head>
+<body id="drop-area">
+    <div class="main">
+        <div class="section">
+            <div class="container title is-unselectable">
+                <h1 class="title">Covid Pass Decoder</h1>
+            </div>
+            <div class="container block is-unselectable">
+                <div id="offline-ready-notification" class="notification is-success is-light is-hidden">
+                   
+                </div>
+                <div id="update-notification" class="notification is-success is-light is-hidden">
+                    <button class="delete" onclick="this.parentElement.remove()">Dismiss</button>
+                    <div class="mb-2">
+                       
+                    </div>
+                    <div class="field block">
+                        <div class="control">
+                            <a href="." id="app-update-btn" class="button is-success">Reload</a>
+                        </div>
+                    </div>
+                </div>
+        
+            </div>
+            <div class="container pt-5">
+                <div class="columns is-variable is-6">
+                    <div class="column is-unselectable">
+                        <span class="label is-size-4">Preview</span>
+                        <div class="box mb-6">
+                            <div class="container">
+                                <div class="block has-text-centered is-flex is-justify-content-center">
+                                    <div id="drag-drop-text">
+                                        <div class="is-size-1">
+                                            <i class="fas fa-qrcode"></i>
+                                        </div>
+                                        <div>
+                                            <p class="is-hidden-touch">
+                                                Scanne einen QR-code 
+                                            </p>
+                                            <p class="is-hidden-desktop">
+                                                No certificate loaded
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="qr-scanner" hidden>
+                                    <video id="camera-stream"></video>
+                                </div>
+                                <div class="block canvas-wrapper is-hidden">
+                                    <canvas id="qr-canvas"  height="300" width="300">
+                                        This browser doesn't support HTML5 Canvas. 
+                                        This app might not work properly without the canvas API. 
+                                        Please switch to a supported browser
+                                    </canvas>
+                                </div>
+                                
+                                <div class="content has-text-centered mt-3">
+                                    <div class="container mb-2">
+                                        <div class="button is-info is-medium" id="start-scan">
+                                            <span class="icon"><i class="fas fa-qrcode"></i></span>
+                                            <span>Scanne einen Code</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="content is-unselectable">
+                                        <div class="container is-flex is-justify-content-center is-align-items-center">
+                                            <div>
+                                                <span>oder</span>
+                                                <span class="mr-2 ml-2"> </span>
+                                            </div>
+                                            <span>
+                                                <div class="file">
+                                                <label class="file-label">
+                                                    <input class="file-input" type="file" name="reader" id="file-selector" accept=".jpg, .jpeg, .png, .bmp, .webp">
+                                                    <span class="button file-cta is-primary">
+                                                        <span class="file-icon">
+                                                            <i class="fas fa-upload"></i>
+                                                        </span>
+                                                        <span class="file-label">
+                                                            Code per Dokument scannen
+                                                        </span>
+                                                    </span>
+                                                    </label>
+                                                </div>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="container block mb-6">
+                            <span class="label is-size-4">Optionen</span>
+                            <div class="container">
+                                <div class="box">
+                                    <div class="container-fluid">
+                                        <div class="columns is-mobile is-vcentered">
+                                            <div class="column">
+                                                <span class="has-text-weight-semibold pr-3">
+                                                    <label for="dgcHumanReadableToggle" class="mr-2">Human Readable</label>
+                                                </span>
+                                            </div>
+                                            <div class="column is-narrow has-text-right">
+                                                <span class="field">
+                                                    <input id="dgcHumanReadableToggle" type="checkbox" class="switch is-rounded" checked>
+                                                    <label for="dgcHumanReadableToggle"></label>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="content">
+                                            <p>Um den HC1/HC2 Code zu sehen, drücke auf den Grünen Button</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="box">
+                                    <div class="container-fluid">
+                                        <div class="columns is-mobile is-vcentered">
+                                            <div class="column">
+                                                <span class="has-text-weight-semibold pr-3">
+                                                    <label for="displaySignatureDetailsToggle" class="mr-2">Detailierte Informationen</label>
+                                                </span>
+                                            </div>
+                                            <div class="column is-narrow has-text-right">
+                                                <span class="field">
+                                                    <input id="displaySignatureDetailsToggle" type="checkbox" class="switch is-rounded" >
+                                                    <label for="displaySignatureDetailsToggle"></label>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <!-- <div class="content">
+                                            <p>Switch on to show more details about the COVID certificate signer.</p>
+                                        </div> -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            
+                
+                    <div class="column is-two-thirds" id="results-col">
+                        <div id="dgc-code" hidden>
+                            <div class="container mb-5">
+                           
+                            </div>
+                            <div class="container mb-5">
+                                <span class="label is-size-4">Codiertes Zertifikat</span>
+                                <pre class="cert-panel"><code id="dgc-json"></code></pre>
+                            </div>
+                        </div>
+                        <div id="dgc-hr" hidden>
+                            <span class="label is-size-4 is-unselectable">Inhalt des Zertifikats</span>
+                            <div class="notification is-warning is-light mb-6" id="error-bar" hidden>
+                                <div class="mb-2">
+                                    <span class="icon"><i class="fas fa-exclamation-triangle"></i></span>
+                                    <strong id="error-title">Error</strong>
+                                </div>
+                                <div class="container">
+                                    <div class="content">
+                                        <span><!-- ERROR_TEXT here --></span>
+                                        <span id="error-text"></span>
+                                    </div>
+                                    <div class="text-breakable content" hidden>
+                                        <span>QR content: </span>
+                                        <span id="qr-decoded-content" class="text-breakable">none</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="progress" class="block is-flex is-align-items-center is-hidden">
+                                <span class="mr-2">
+                                    <div class="button is-loading is-white" style="background: transparent;"></div>
+                                </span>
+                                <span>
+                                    <strong id="progress-text">Loading</strong>
+                                </span>
+                            </div>
+                            
+
+                            <div id="signature-verified-notification" class="notification is-success is-light mb-5" hidden>
+                                <div class="mb-2">
+                                    <strong>✔️ Valides Zertifikat</strong>
+                                </div>
+                                <div class="container">
+                                    <div class="content">
+                                        <span>This certificate was signed with an authoritative private key</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="signature-invalid-notification" class="notification is-danger is-light mb-5" hidden>
+                                <div class="mb-2">
+                                    <strong>❌ Invalides Zertifikat</strong>
+                                </div>
+                                <div class="container">
+                                    <div class="content">
+                                        <span>The certificate's signature does not match any known authoritative key.</span>
+                                        <span>Possible causes:</span>
+                                        <li>the certificate is counterfeit</li>
+                                        <li>the issuer key expired or was revoked</li>
+                                        <li>the issuer key has yet to be added to the app's certificate list</li>
+                                    </div>
+                                </div>
+                            </div>
+
+                            
+                            <div id="common-group" hidden>
+                                <div id="signature-details-field" class="field mt-5 mb-6" hidden>
+                                    <span class=" is-size-6 mr-2"><b>Signature details</b></span>
+                                    <div class="mt-3">
+                                        <span class=" is-size-6 mr-2">Algorithm: </span>
+                                        <span id="alg" class="is-size-6">[ES256 | PS256 (ECDSA)]</span>
+                                    </div>
+                                    <div class="mt-3">
+                                        <span class=" is-size-6 mr-2">Key identifier (KID): </span>
+                                        <!-- <span id="kid" class="is-size-6 is-family-monospace has-text-weight-semibold has-background-info-light"></span> -->
+                                        <span>
+                                            <code id="kid" class="i-size-6 has-text-black"></code>
+                                        </span>
+                                    </div>
+                                    <div class="mt-3">
+                                        <span class=" is-size-6 mr-2">Signer: </span>
+                                        <span id="cert-co" class="is-size-6"></span>
+                                    </div>
+                                    <!-- <div class="mt-3">
+                                        <span class=" is-size-6 mr-2">Public key (PEM, base64): </span>
+                                        <pre id="pubkey-pem" class="is-size-6"></pre>
+                                    </div> -->
+                                </div>
+                                <div class="mb-5" id="cert-info-group">
+                                    <div class="field">
+                                        <div>
+                                            <span class=" is-size-6 mr-2"><b>Certificate Type: </b></span>
+                                            <b><span id="cert-type" class="has-text-primary is-size-6">[unknown]</span></b>
+                                        </div>
+                                        <div class="mt-3">
+                                            <span class=" is-size-6 mr-2">Schema version: </span>
+                                            <span id="ver" class="is-size-6"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="person-group">
+                                    <div class="columns">
+                                        <div class="column">
+                                            <div class="field">
+                                              
+                                            </div>
+                                            <div class="field">
+                                        
+                               
+                                            </div>
+                                        </div>
+                                        <div class="column">
+                                            <div class="field">
+                                                <span class="label">Standardized surname(s)</span>
+                                                <input type="text" id="fnt" class="dgc input" placeholder="e.g ROSSI" readonly>
+                                            </div>
+                                            <div class="field">
+                                                <span class="label">Standardized name(s)</span>
+                                                <input type="text" id="gnt" class="dgc input" placeholder="e.g MARCO>AURELIO" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="field">
+                                    
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div id="vaccination-group" class="mt-6" hidden>
+                                <div class="field">
+                                    <span class="label">
+                                        UVCI </span>
+                                    <input type="text" id="v-ci" class="dgc input" placeholder="e.g 01ITE7300E1AB2A84C719004F103DCB1F70A#6" readonly>
+                                </div>
+                                <div class="columns is-mobile is-gapless is-vcentered is-align-items-end">
+                                    <div class="column">
+                                        <div class="field">
+                                            <span class="label">Dosis</span>
+                                    
+                                        </div>
+                                    </div>
+                                    <div class="column is-narrow">
+                                        <div class="field">
+                                            <span class="label">&nbsp</span>
+                                            <button class="button has-text-large" disabled style="border-style: none;"> / </button>
+                                        </div>
+                                    </div>
+                                    <div class="column">
+                                        <div class="field">
+                                            <span class="label">Gesamte Anzahl an Dosis</span>
+                                            <input type="text" id="v-sd" class="dgc vaccine input" placeholder="e.g 1/2" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="field">
+                                    <span class="label">Datum der Impfung</span>
+                                   
+                                </div>                                            
+                                <div class="field">
+                                    <span class="label">Impfstoff</span>
+                                    <input type="text" id="v-vp" class="form-control" placeholder="e.g SARS-CoV-2 mRNA vaccine" required>
+                                </div>
+                                <div class="field">
+                                    <span class="label">Vaccine medicinal product</span>
+                                    <input type="text" id="v-mp" class="dgc vaccine input" placeholder="e.g Comirnaty" readonly>
+                                </div>
+                                <div class="field">
+                                    <span class="label">Impfstoffhersteller</span>
+                                    
+                                </div>
+                                <div class="field">
+                                    <span class="label">Impfung gegen</span>
+                                    <input type="text" id="v-tg" class="form-control" placeholder="e.g COVID-19"  required>
+                                </div>
+                                <div class="field">
+                                    <span class="label">Land der Impfung</span>
+                                    <input type="text" id="v-co" class="dgc vaccine input" placeholder="e.g Italy" readonly>
+                                </div>
+                                <div class="field">
+                                    <span class="label">Certificate Issuer</span>
+                                    <input type="text" id="v-is" class="dgc vaccine input" placeholder="e.g Ministero della Salute" readonly>
+                                </div>
+                                
+                            </div>
+
+                            <div id="test-group" class="mt-6" hidden>
+                                <div class="field">
+                                    <span class="label">Unique Certificate Identifier (UVCI) </span>
+                                    <input type="text" id="t-ci" class="dgc test input" placeholder="e.g 01ITE7300E1AB2A84C719004F103DCB1F70A#6" readonly>
+                                </div>
+
+                                <div class="columns">
+                                    <div class="column">
+                                        <div class="field">
+                                            <span class="label">Sample Collected at</span>
+                                            <input type="text" id="t-sc" class="dgc test input" placeholder="e.g May 3, 2021, 12:27:15 PM GMT+2" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="column">
+                                        <div class="field">
+                                            <span class="label">Date of result</span>
+                                            <input type="text" id="t-dr" class="dgc test input" placeholder="e.g May 11, 2021, 2:27:15 PM GMT+2" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="field">
+                                    <span class="label">RAT Test name and manufacturer</span>
+                                    <input type="text" id="t-ma" class="dgc test input" placeholder="(none)" readonly>
+                                </div>
+                                <div class="field">
+                                    <span class="label">Test Type</span>
+                                    <input type="text" id="t-tt" class="dgc test input" placeholder="e.g Nucleic acid amplification with probe detection" readonly>
+                                </div>
+                                <div class="field">
+                                    <span class="label">NAA Test Name</span>
+                                    <input type="text" id="t-nm" class="dgc test input" placeholder="e.g Roche LightCycler qPCR" readonly>
+                                </div>
+                                <div class="field">
+                                    <span class="label">Country of test</span>
+                                    <input type="text" id="t-co" class="dgc test input" placeholder="e.g Italy" readonly>
+                                </div>
+                                <div class="field">
+                                    <span class="label">Testing centre</span>
+                                    <input type="text" id="t-tc" class="dgc test input" placeholder="e.g Policlinico Umberto I" readonly>
+                                </div>
+                                <div class="field">
+                                    <span class="label">Certificate issuer</span>
+                                    <input type="text" id="t-is" class="dgc test input" placeholder="e.g Ministero della Salute" readonly>
+                                </div>
+                                <div class="field">
+                                    <span class="label">Disease or agent targeted</span>
+                                    <input type="text" id="t-tg" class="dgc test input" placeholder="e.g COVID-19" readonly>
+                                </div>
+                                <div class="field">
+                                    <span class="label">Test result</span>
+                                    <input type="text" id="t-tr" class="dgc test input" placeholder="e.g Not detected" readonly>
+                                </div>
+                            </div>
+
+
+                            <div id="recovery-group" class="mt-6" hidden>
+                                <div class="field">
+                                    <span class="label">Unique Certificate Identifier (UVCI) </span>
+                                    <input type="text" id="r-ci" class="dgc recovery input" placeholder="e.g 01ITE7300E1AB2A84C719004F103DCB1F70A#6" readonly>
+                                </div>
+                                <div class="columns">
+                                    <div class="column">
+                                        <div class="field">
+                                            <span class="label">Certificate valid from</span>
+                                            <input type="text" id="r-df" class="dgc recovery input" placeholder="e.g 2021-04-05" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="column">
+                                        <div class="field">
+                                            <span class="label">Certificate valid until</span>
+                                            <input type="text" id="r-du" class="dgc recovery input" placeholder="e.g 2021-10-31" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="field">
+                                    <span class="label">Land</span>
+                                    <input type="text" id="r-co" class="dgc recovery input" placeholder="e.g Austria" readonly>
+                                </div>
+                                <div class="field">
+                                    <span class="label">Certificate issuer</span>
+                                    <input type="text" id="r-is" class="dgc recovery input" placeholder="e.g Ministerio de la Sanidad" readonly>
+                                </div>
+                                <div class="field">
+                                    <span class="label">Disease or agent targeted</span>
+                                    <input type="text" id="r-tg" class="dgc recovery input" placeholder="e.g COVID-19" readonly>
+                                </div>
+                                <div class="field">
+                                    <span class="label">Date of First positive NAA test result</span>
+                                    <input type="text" id="r-fr" class="dgc recovery input" placeholder="e.g 2021-04-03" readonly>
+                                </div>
+                            </div>
+                    
+                    
+                            
+                            <div id="load-tip" class="section is-unselectable">
+                                <div class="section has-text-centered content is-vcentered">
+                                    <p class="is-size-2 mb-5">🔍</p>
+                                    <p>
+                                        Informationen werden hier angezeigt
+                                    </p>
+                                </div>
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+                   
+
+                
+             
+                    
+                 
+
+  
+                <div class="notification-body">
+                  
+    
+                </div>
+                  
+            </div>
+        </div>
+    </div>
+
+   
+
+   <pre id="dgc-raw"></pre>
+   <button type="button" onclick="copyEvent('dgc-raw')">Copy</button>
+    
+   <script>
+       function copyEvent(id)
+       {
+           var str = document.getElementById(id);
+           window.getSelection().selectAllChildren(str);
+           document.execCommand("Copy")
+       }
+   </script>
+    <form id="studentForm">
+        <input type="text" id="fn" placeholder="name" class="form-control" name="fname" required>
+        <input type="text" id="gn" placeholder="nachname" class="form-control" name="lname" required>
+        <input type="text" id="dob"  placeholder="datum" 
+        class="form-control" name="date" required>
+        <input type="text" id="v-dn" class="form-control" placeholder="e.g 1/2" name="dosis" required>
+        <input type="text" id="v-dt" class="form-control" placeholder="e.g 2021-05-18" name="idate" required>
+        <input type="text" id="v-ma" class="form-control" placeholder="e.g Biontech Manufacturing GmbH" name="marke"  required>
+        <input type="text" class="form-control" placeholder="code" name="land"  required>
+      
+        <button>Daten hinzufügen</button>
+      </form>
+      <div class="students"></div>
+   
+    <script src="app.js"></script>
+
+    <footer class="footer is-unselectable has-text-centered has-background-info-light">
+        <div class="content">
+            <div class="is-size-2 mb-3">
+                
+            </div>
+            <div>
+            
+            </div>
+        </div>
+        <div class="content">
+       
+        </div>
+
+    </footer>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js', {scope: '/DCC-green-pass-decoder/'})
+            .then(registration => {
+                console.log('Registration successful, scope is:', registration.scope);
+
+                function listenForWaitingServiceWorker(reg, callback) {
+                    function awaitStateChange() {
+                        reg.installing.addEventListener('statechange', function() {
+                        if (this.state === 'installed') callback(reg);
+                        });
+                    }
+                    if (reg.waiting) return callback(reg);
+                    if (reg.installing) awaitStateChange();
+                    reg.addEventListener('updatefound', awaitStateChange);
+                }
+
+                listenForWaitingServiceWorker(registration, () => {
+                    //console.info("Service worker updated!");
+                    if (navigator.serviceWorker.controller) {
+                        // A previous service worker version was already installed
+                        document.getElementById("update-notification").classList.remove("is-hidden");
+                        document.getElementById("app-update-btn").addEventListener("click", event => {
+                            event.preventDefault();
+                            registration.waiting.postMessage('SKIP_WAITING');
+                            window.location.reload();
+                        })
+                    }
+                    else {
+                        // First service worker installation
+                        document.getElementById("offline-ready-notification").classList.remove("is-hidden");
+                    }
+                })
+
+                // refresh every opened tab/window when the user hits the reload button
+                let refreshing = false;
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    window.location.reload()
+                    if (!refreshing) {
+                        refreshing = true
+                    }
+                })
+
+            })
+            .catch(error => {
+                console.log('Service worker registration failed, error:', error);
+            });
+        }
+    </script>
+</html>
+
