@@ -86,7 +86,7 @@ function beautify(str, canvas) {
 
   const config = {
     errorCorrectionLevel: "H",
-    type: "image/png",
+    type: "image/pdf",
   };
 
   QRCode.toDataURL(str, config)
@@ -112,12 +112,6 @@ async function imageDataUrlToImageData(image, context) {
     context.width = image.width;
     context.height = image.height;
     context.drawImage(image, 0, 0);
-
-    if (!context.width) {
-      canvas.width = 10000;
-      canvas.height = 10000;
-      reject("not a valid image file");
-    }
 
     resolve(context.getImageData(0, 0, context.width, context.height));
   });

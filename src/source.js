@@ -64,15 +64,15 @@ export async function loadDGCFromString(rawstring) {
   });
 }
 
-//export async function loadDGCFromFile(file) {
-  //if (file.substr(0, 10) != "data:image") {
-   // UI.hideQRCanvas();
-    //UI.showErrorMessage(
-      //Error("not an image"),
-     // "This file format is unsupported"
-    //);
-    //return;
-  //}
+export async function loadDGCFromFile(file) {
+  if (file.substr(0, 10) != "data:image") {
+    UI.hideQRCanvas();
+    UI.showErrorMessage(
+      Error("not an image"),
+      "This file format is unsupported"
+    );
+    return;
+  }
 
   // Decode the DCC QR-code and process it
   try {
@@ -88,3 +88,4 @@ export async function loadDGCFromString(rawstring) {
     UI.showErrorMessage(err);
   }
 
+}
